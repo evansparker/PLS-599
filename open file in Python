@@ -1,0 +1,4 @@
+with open('file.txt', 'r') as inpt:
+	#Save inpt string as s
+	s = inpt.read()
+	
