@@ -1,0 +1,14 @@
+#The structure for this code was obtained from https://www.biostars.org/p/14305/
+
+import re
+infile=open("seq.fasta",'r')
+out=open("results.csv",'w')
+pattern=re.compile(r"N[^P](S|T)")
+for line in infile:
+   line = line.strip("\n")
+   if line.startswith('>'):
+      name=line
+   else:      
+      s = re.findall(pattern,line)
+      print '%s:%s (%s hits)' %(name,s, len(s))
+      out.write('%s:\t%s\n' %(name,s))
