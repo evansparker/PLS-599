@@ -3,12 +3,29 @@
 import re
 infile=open("seq.fasta",'r')
 out=open("results.csv",'w')
+
+# REDOX Potential
+
+potential=re.compile(r"HCH...H....(M|L|F")
+for line in infile:
+   line = line.strip("\n")
+   if line.startswith('>'):
+      name=line
+   else:
+      s = re.findall(potential,line)
+      print '%s:%s' %(name,s)
+      out.write('%s:\t%s\n' %(name,s)
+# N-Glycosylation
+open("results.csv", 'r')
+
 pattern=re.compile(r"N[^P](S|T)")
 for line in infile:
    line = line.strip("\n")
    if line.startswith('>'):
       name=line
-   else:      
+   else:
       s = re.findall(pattern,line)
       print '%s:%s (%s hits)' %(name,s, len(s))
-      out.write('%s:\t%s\n' %(name,s))
+      out.write('%s:\t%s\n' %(name,len(s))
+# now I want to sort by s
+#
