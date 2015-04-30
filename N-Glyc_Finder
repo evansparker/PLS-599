@@ -1,0 +1,18 @@
+import re
+data_file ='/Applications/Dropbox/School/Python/uniprot-laccase+100+AA.fasta'
+sequence = ''
+Valid = False
+for line in open(data_file):
+    line = line.rstrip()
+    if re.match("^>",line):
+        if re.findall('N[^P](S|T)[^P]',sequence):
+            print line
+            print sequence
+        sequence = ''
+        continue
+    else:
+        sequence += line
+# below is needed to allow printing of final sequence which is not followed by a new fasta entry
+    if re.findall('N[^P](S|T)[^P]',sequence):
+        print line
+        print sequence
