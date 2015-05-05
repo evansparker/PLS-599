@@ -1,3 +1,6 @@
+#I used the SPYDER python IDE and the quick install for biopython, 
+#DWIM Perl for Windows, and the open-source NCBI tool FASTA match RegEx
+
 #!/usr/bin/perl
 
 use strict;
