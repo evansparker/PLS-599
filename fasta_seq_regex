@@ -1,0 +1,116 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+BEGIN 
+{
+    unshift @INC, './modules';
+}
+
+use Jls::Software;
+use Jls::Fasta;
+use Jls::File;
+
+my $input;
+my $output;
+my $regex;
+my $is_case_insensitive = 0;
+my $complement;
+
+my $str;
+
+if ($#ARGV == -1) { Jls::Software::error ('', -1); }
+
+for (my $arg = 0; $arg <= $#ARGV; $arg++)
+{
+    my $s = substr ($ARGV [$arg], 0, 2);
+
+    if ($s eq '-c')
+    {
+        $is_case_insensitive = 1;
+    }
+    elsif ($arg == $#ARGV) { Jls::Software::error ($ARGV [$arg], 1); }
+    elsif ($s eq '-i')
+    {
+        if ($input) { Jls::Software::error ($ARGV [$arg], 2); }
+        
+        $input = $ARGV [++$arg];
+        $str = Jls::File::file_to_string ($input);
+    }
+    elsif ($s eq '-o')
+    {
+        if ($output) { Jls::Software::error ($ARGV [$arg], 2); }
+        $output = $ARGV [++$arg];
+        open (STDOUT, ">$output") or 
+            die "Redirection of STDOUT to $output failed.";
+    }
+    elsif ($s eq '-n')
+    {
+        if ($complement) { Jls::Software::error ($ARGV [$arg], 2); }
+        $complement = $ARGV [++$arg];
+        open (COMPLEMENT, ">$complement") or 
+            die "The file $complement could not be opened.";
+    }
+    elsif ($s eq '-r')
+    {
+        if ($regex) { Jls::Software::error ($ARGV [$arg], 2); }
+        
+        $regex = $ARGV [++$arg];
+    }
+    else { Jls::Software::error ($ARGV [$arg], 0); }
+}
+
+my $c_fastas;
+my @empty = ();
+
+if (! $input) { die 'No input file was specified with the -i argument.'; }
+if (! $regex) { die 'No regular expression was specified with the -r argument.'; }
+if (defined $complement) { $c_fastas = \@empty; }
+
+my $in_fastas = Jls::Fasta::string2fastas ($str);
+
+my $out_fastas = Jls::Fasta::match 
+                    ($in_fastas, $regex, $is_case_insensitive, $c_fastas);
+
+$str = Jls::Fasta::fastas2string ($out_fastas);
+print STDOUT $str;
+close STDOUT;
+
+if (defined $complement)
+{
+    $str = Jls::Fasta::fastas2string ($c_fastas);
+    print COMPLEMENT $str;
+    close COMPLEMENT;
+}
+
+sub name
+{
+    return 'fasta_matchregex.pl 1.0';
+}
+
+sub args
+{
+my $msg = '
+The program selects FASTA records whose deflines match a Perl regular expression.
+Perl regular expression modifiers are optional.
+The matches are stable, i.e., record order within the FASTA file is preserved. 
+
+Program options are arguments with \'-\' followed by a letter.
+An option requiring further input(s) appears with square brackets.
+The default for an option, if any, is indicated in parentheses.
+An option with no input always has a default; it lacks square brackets.
+
+-i [input FASTA file] 
+-o [output FASTA file, for overwriting] (default : STDOUT)
+-r [Perl regular expression]
+-c  case-insensitive match (default : case-sensitive match)
+-n [output FASTA file, for overwriting, of non-matching records] 
+       (default : not generated for output)
+
+Please see the URL
+http://www.ncbi.nlm.nih.gov/CBBresearch/Spouge/html.ncbi/fasta/list.html
+for further information.';
+
+    return $msg;
+}
